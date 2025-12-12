@@ -141,3 +141,35 @@ class StockMovementRetrieveAPIView(generics.RetrieveAPIView):
     queryset = StockMovement.objects.all().select_related("product", "user")
     serializer_class = StockMovementSerializer
     permission_classes = [IsAuthenticated]
+
+import openpyxl
+from openpyxl.utils import get_column_letter
+from django.http import HttpResponse
+
+class ProductsExcelReportAPIView(generics.ListAPIView):
+    queryset = Product.objects.all().order_by("id")
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated, ProductPermission]
+
+    def get(self, request, *args, **kwargs):
+        qs = self.filter_queryset(self.get_queryset())  # ✅ نفس filters/search/order لو موجودين
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Products"
+
+        headers = ["ID", "SKU", "Name", "Category", "Cost", "Selling", "Stock"]
+        ws.append(headers)
+
+        for p in qs:
+            ws.append([p.id, p.sku, p.name, p.category, float(p.cost_price), float(p.selling_price), p.stock_qty])
+
+        for col in range(1, len(headers) + 1):
+            ws.column_dimensions[get_column_letter(col)].width = 18
+
+        resp = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        resp["Content-Disposition"] = 'attachment; filename="products_report.xlsx"'
+        wb.save(resp)
+        return resp

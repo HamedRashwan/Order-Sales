@@ -8,7 +8,7 @@ from .views import (
     SalesOrderListAPIView, SalesOrderCreateAPIView, SalesOrderRetrieveAPIView,
     SalesOrderUpdateAPIView, SalesOrderDeleteAPIView,
     StockMovementListAPIView, StockMovementRetrieveAPIView,
-    UserRegisterAPIView,
+    UserRegisterAPIView,ProductsExcelReportAPIView,
 )
 
 
@@ -31,4 +31,6 @@ urlpatterns = [
     path("orders/<int:pk>/delete/", SalesOrderDeleteAPIView.as_view()),
     path("stock-movements/", StockMovementListAPIView.as_view()),
     path("stock-movements/<int:pk>/", StockMovementRetrieveAPIView.as_view()),
+    path("reports/products.xlsx", ProductsExcelReportAPIView.as_view()),
+
 ]
